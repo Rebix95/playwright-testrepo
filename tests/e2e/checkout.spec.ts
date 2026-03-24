@@ -1,12 +1,14 @@
 import { test, expect } from '@playwright/test';
 import testData from '../../fixtures/testData.json';
 import { UserData } from '../../fixtures/types';
+import { CheckoutPage } from '../../pages/CheckoutPage';
 
 const dataSet: UserData[] = testData;
 
 test.describe.parallel('Checkout Data-Driven Tests', () => {
     for (const data of dataSet) {
         test(`Checkout test: ${data.description}`, async ({ page }) => {
+            const checkoutPage = new CheckoutPage(page);
 
             // Go to HP LP3065 product page
             await page.goto('https://ecommerce-playground.lambdatest.io/index.php?route=product/product&product_id=47');
@@ -37,39 +39,18 @@ test.describe.parallel('Checkout Data-Driven Tests', () => {
 
             // -------------------------------------------------------------------------
 
-            // Enter personal details
-            await page.locator('#input-payment-firstname').fill(data.firstName);
-            await page.locator('#input-payment-lastname').fill(data.lastName);
-            await page.locator('#input-payment-email').fill(data.email);
-            await page.locator('#input-payment-telephone').fill(data.phone);
+            // Fill data through Page Object
+            await checkoutPage.fillPersonalDetails(data);
+            await checkoutPage.fillBillingAddress(data);
+            await checkoutPage.acceptTerms();
+            await checkoutPage.submitForm();
 
-            // Enter billing address
-            await page.locator('#input-payment-address-1').fill(data.address);
-            await page.locator('#input-payment-city').fill(data.city);
-            await page.locator('#input-payment-postcode').fill(data.postcode);
-            await page.locator('#input-payment-country').selectOption({ value: data.country });
-            await page.locator('#input-payment-zone').selectOption({ value: data.zone });
+            // Validation through Page Object
 
-            // Accept Terms & Conditions
-            const checkTerms = page.locator('#input-agree');
-            await checkTerms.waitFor({ state: 'visible'});
-            await checkTerms.click({ force: true });
-            await expect(checkTerms).toBeChecked();
-
-            // Complete form and continue
-            await page.getByRole('button', { name: 'Continue ' }).click();
-
-            // Validation
-            if (data.expectedErrors !== null) {
-                for (const field in data.expectedErrors) {
-                    const errorLocator = page.locator(`#input-payment-${field} + .invalid-feedback`);
-                    await expect(errorLocator).toHaveText(data.expectedErrors[field]);
-                }
-
-                const allErrors = page.locator('.invalid-feedback');
-                await expect(allErrors).toHaveCount(Object.keys(data.expectedErrors).length);
-
+            if (data.expectedErrors) {
+                await checkoutPage.validationFieldErrors(data.expectedErrors);
             } else {
+
                 // Check correct page is showing
                 await expect(page).toHaveURL(/checkout\/confirm/);
 

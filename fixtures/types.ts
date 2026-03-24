@@ -11,5 +11,5 @@ export type UserData = {
   postcode: string;
   country: string;
   zone: string;
-  expectedErrors: Record<string, string> | null;
+  expectedErrors: Partial<Record<string, string>> | null;
 };
