@@ -1,0 +1,69 @@
+[
+  {
+    "description": "Valid user",
+    "username": "stefanharlaar@gmail.com",
+    "password": "Test123",
+    "firstName": "Stefan",
+    "lastName": "Test",
+    "phone": "+31612345678",
+    "email": "stefanharlaar@gmail.com",
+    "address": "Teststreet 10",
+    "city": "Testcity",
+    "postcode": "1000AB",
+    "country": "150",
+    "zone": "2336",
+    "expectedErrors": null
+  },
+  {
+    "description": "Empty first name",
+    "username": "stefanharlaar@gmail.com",
+    "password": "Test123",
+    "firstName": "",
+    "lastName": "Test",
+    "phone": "+31612345678",
+    "email": "stefanharlaar@gmail.com",
+    "address": "Teststreet 10",
+    "city": "Testcity",
+    "postcode": "1000AB",
+    "country": "150",
+    "zone": "2336",
+    "expectedErrors": {
+      "firstname": "First Name must be between 1 and 32 characters!"
+    }
+  },
+  {
+    "description": "Invalid email",
+    "username": "stefanharlaar@gmail.com",
+    "password": "Test123",
+    "firstName": "Stefan",
+    "lastName": "Test",
+    "phone": "+31612345678",
+    "email": "stefan@",
+    "address": "Teststreet 10",
+    "city": "Testcity",
+    "postcode": "1000AB",
+    "country": "150",
+    "zone": "2336",
+    "expectedErrors": {
+      "email": "E-Mail address does not appear to be valid!"
+    }
+  },
+
+  {
+    "description": "Last name too long",
+    "username": "stefanharlaar@gmail.com",
+    "password": "Test123",
+    "firstName": "Stefan",
+    "lastName": "Testtesttesttesttesttesttesttesttest",
+    "phone": "+31612345678",
+    "email": "stefanharlaar@gmail.com",
+    "address": "Teststreet 10",
+    "city": "Testcity",
+    "postcode": "1000AB",
+    "country": "150",
+    "zone": "2336",
+    "expectedErrors": {
+      "lastname": "Last Name must be between 1 and 32 characters!"
+    }
+  }
+]
