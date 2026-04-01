@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import testData from '../../fixtures/testData.json';
 import { UserData } from '../../fixtures/types';
 import { CheckoutPage } from '../../pages/CheckoutPage';
+import { ProductPage } from '../../pages/ProductPage';
 
 const dataSet: UserData[] = testData;
 
@@ -9,35 +10,19 @@ test.describe.parallel('Checkout Data-Driven Tests', () => {
     for (const data of dataSet) {
         test(`Checkout test: ${data.description}`, async ({ page }) => {
             const checkoutPage = new CheckoutPage(page);
+            const productPage = new ProductPage(page);
 
-            // Go to HP LP3065 product page
-            await page.goto('https://ecommerce-playground.lambdatest.io/index.php?route=product/product&product_id=47');
+            // Open product and add to cart
+            await productPage.openProduct('https://ecommerce-playground.lambdatest.io/index.php?route=product/product&product_id=47');
+            await productPage.addToCart();
+            await productPage.openCart();
+            await productPage.proceedToCheckout();
 
-            // Add product to cart
-            const addToCartBtn = page.getByRole('button', { name: 'Add to Cart' });
-            await addToCartBtn.click();
-
-            // Wait for notification box to close
-            await page.locator('#notification-box-top').waitFor({ state: 'hidden' });
-
-            // Open fly-in cart
-            const cartBtn = page.locator('#entry_217825 a.cart');
-            await cartBtn.click();
-
-            // Check if fly-in cart is visible
-            const flyInCart = page.locator('#cart-total-drawer');
-            await expect(flyInCart).toBeVisible();
-
-            // Click Checkout button
-            await page.getByRole('button', { name: ' Checkout' }).click();
-
-            // Click Guest Checkout
+            // Select Guest Checkout
             const guestRadio = page.getByLabel('Guest Checkout');
             await guestRadio.waitFor({ state: 'visible' });
             await guestRadio.click({ force: true });
             await expect(guestRadio).toBeChecked();
-
-            // -------------------------------------------------------------------------
 
             // Fill data through Page Object
             await checkoutPage.fillPersonalDetails(data);
@@ -46,7 +31,6 @@ test.describe.parallel('Checkout Data-Driven Tests', () => {
             await checkoutPage.submitForm();
 
             // Validation through Page Object
-
             if (data.expectedErrors) {
                 await checkoutPage.validationFieldErrors(data.expectedErrors);
             } else {

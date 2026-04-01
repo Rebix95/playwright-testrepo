@@ -46,14 +46,18 @@ export class CheckoutPage {
         await this.continueBtn.click();
     }
 
-    async validationFieldErrors(expectedErrors: Record<string, string>) {
+    async validationFieldErrors(expectedErrors: Partial<Record<string, string>>) {
         for (const field in expectedErrors) {
-            const errorLocator = this.page.locator(`#input-payment-${field} + .invalid-feedback`);
-            await expect(errorLocator).toHaveText(expectedErrors[field]);
+            const errorText = expectedErrors[field];
+            if (errorText) {
+                const errorLocator = this.page.locator(`#input-payment-${field} + .invalid-feedback`);
+                await expect(errorLocator).toHaveText(errorText);
+            }
         }
 
         // Check number of errors
+        const count = Object.values(expectedErrors).filter(Boolean).length;
         const allErrors = this.page.locator('.invalid-feedback');
-        await expect(allErrors).toHaveCount(Object.keys(expectedErrors).length);
+        await expect(allErrors).toHaveCount(count);
     }
 }
