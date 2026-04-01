@@ -1,54 +1,46 @@
 import { test, expect } from '@playwright/test';
+import { ProductPage } from '../../pages/ProductPage';
 
 test('add to cart', async ({ page }) => {
-    // Go to product page
-    await page.goto('https://ecommerce-playground.lambdatest.io/index.php?route=product/product&path=25&product_id=47');
+    const productPage = new ProductPage(page);
 
-    // Check title and price 
-    await expect(page.getByRole('heading', { name: /HP LP3065/i })).toBeVisible();
-    await expect(page.getByRole('heading', { name: '$122.00' })).toBeVisible();
+    // Go to product page
+    await productPage.openProduct('https://ecommerce-playground.lambdatest.io/index.php?route=product/product&path=25&product_id=47')
+
+    // Check title and price
+    await productPage.validateProductDetails('HP LP3065', '$122.00');
 
     // Add product to cart
-    const addToCartBtn = page.getByRole('button', { name: 'Add to Cart' });
-    await addToCartBtn.click();
-
-    // Wait for notification box to close
-    await page.locator('#notification-box-top').waitFor({ state: 'hidden' });
+    await productPage.addToCartBtn.click();
 
     // Open fly-in cart
-    const cartBtn = page.locator('#entry_217825 a.cart');
-    await cartBtn.click();
-
-    // Check if fly-in cart is visible
-    const flyInCart = page.locator('#cart-total-drawer');
-    await expect(flyInCart).toBeVisible();
+    await productPage.openCart();
 
     // Check if fly-in cart show product title, quantity and price
-    await expect(flyInCart.getByRole('link', { name: /HP LP3065/i }).first()).toBeVisible();
-
-    const quantityCell = flyInCart.getByRole('cell', { name: 'x1' });
-    await expect(quantityCell).toBeVisible();
-
-    const priceCell = flyInCart.getByRole('cell', { name: '$122.00' }).first();
-    await expect(priceCell).toBeVisible();
+    await productPage.validateFlyInCart('HP LP3065', 'x1', '$122.00');
 
     // Open cart overview
-    const cartOverviewBtn = flyInCart.getByRole('button', { name: / Edit cart/i});
-    await cartOverviewBtn.click();
+    await productPage.cartOverviewBtn.click();
 
-    // Check if cart overview is visible
-    const cartURL = 'https://ecommerce-playground.lambdatest.io/index.php?route=checkout/cart';
-    await expect(page).toHaveURL(cartURL);
 
-    const cartOverview = page.locator('#checkout-cart');
-    await expect(cartOverview).toBeVisible();
+    // Validate cart overview
+    await productPage.validateCartOverview('HP LP3065', '1');
 
-    // Check if cart overview shows product title
-    await expect(cartOverview.getByRole('link', { name: /HP LP3065/i }).first()).toBeVisible();
+    // -----------------------------------------------------------------------------------------------
 
-    // Check if cart overview shows product quantity
-    const quantityInput = cartOverview.locator('input[name^="quantity"]');
-    await expect(quantityInput).toHaveValue('1');
+    // // Check if cart overview is visible
+    // const cartURL = 'https://ecommerce-playground.lambdatest.io/index.php?route=checkout/cart';
+    // await expect(page).toHaveURL(cartURL);
+
+    // const cartOverview = page.locator('#checkout-cart');
+    // await expect(cartOverview).toBeVisible();
+
+    // // Check if cart overview shows product title
+    // await expect(cartOverview.getByRole('link', { name: /HP LP3065/i }).first()).toBeVisible();
+
+    // // Check if cart overview shows product quantity
+    // const quantityInput = cartOverview.locator('input[name^="quantity"]');
+    // await expect(quantityInput).toHaveValue('1');
 
     // Check if cart overview shows correct unit price
     const firstRow = cartOverview.locator('tbody > tr').first();
